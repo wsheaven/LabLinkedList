@@ -15,7 +15,7 @@
  *        Node         : A class representing a Node
  *    Additionally, it will contain a few functions working on Node
  * Author
- *    <your names here>
+ *    Abram Hansen, Sam Heaven
  ************************************************************************/
 
 #pragma once
@@ -45,11 +45,13 @@ public:
    }
    Node(const T &  data)
    {
-      pPrev = pNext = this;
+      this->data = data;
+      pPrev = pNext = nullptr;
    }
-   Node(      T && data)
+   Node(T && data)
    {
-      pPrev = pNext = this;
+      this->data = std::move(data);
+      pPrev = pNext = nullptr;
    }
 
    //
@@ -72,7 +74,18 @@ public:
 template <class T>
 inline Node <T> * copy(const Node <T> * pSource) 
 {
-   return new Node<T>;
+   Node<T>* newList = new Node<T>;
+   Node<T>* iterator = newList;
+
+   if (pSource != nullptr) {
+      while (pSource->pNext != nullptr) {
+         iterator->data = pSource->data;
+         pSource = pSource->pNext;
+         iterator->pNext = new Node<T>;
+         iterator = iterator->pNext;
+      }
+   }
+   return newList;
 }
 
 /***********************************************
@@ -97,7 +110,7 @@ inline void assign(Node <T> * & pDestination, const Node <T> * pSource)
 template <class T>
 inline void swap(Node <T>* &pLHS, Node <T>* &pRHS)
 {
-
+   std::swap(pLHS, pRHS);
 }
 
 /***********************************************

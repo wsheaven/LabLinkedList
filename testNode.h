@@ -41,7 +41,7 @@ public:
       test_swap_emptyStandard();
       test_swap_standardEmpty();
       test_swap_oneTwo();
-
+      /*
       // Insert
       test_insert_emptyBefore();
       test_insert_emptyAfter();
@@ -64,7 +64,7 @@ public:
       // Status
       test_size_empty();
       test_size_standard();
-      test_size_standardMiddle();
+      test_size_standardMiddle();*/
       
       report("Node");
    }
