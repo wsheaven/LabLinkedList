@@ -43,10 +43,9 @@ public:
    {
       pPrev = pNext = nullptr;
    }
-   Node(const T &  data)
+   Node(const T &  data) : data(data), pPrev(nullptr), pNext(nullptr)
    {
-      this->data = data;
-      pPrev = pNext = nullptr;
+      
    }
    Node(T && data)
    {
@@ -74,18 +73,18 @@ public:
 template <class T>
 inline Node <T> * copy(const Node <T> * pSource) 
 {
-   Node<T>* newList = new Node<T>;
-   Node<T>* iterator = newList;
+    Node<T>* pDestination = nullptr;
+    const Node<T>* pSrc = pSource;
+    Node<T>* pDes = nullptr;
 
-   if (pSource != nullptr) {
-      while (pSource->pNext != nullptr) {
-         iterator->data = pSource->data;
-         pSource = pSource->pNext;
-         iterator->pNext = new Node<T>;
-         iterator = iterator->pNext;
-      }
-   }
-   return newList;
+    while (pSrc != nullptr) {
+        pDes = insert(pDes, pSrc->data, false);
+        if (pDestination == nullptr) {
+            pDestination = pDes;
+        }
+        pSrc = pSrc->pNext;
+    }
+    return pDestination;
 }
 
 /***********************************************
@@ -99,7 +98,47 @@ inline Node <T> * copy(const Node <T> * pSource)
 template <class T>
 inline void assign(Node <T> * & pDestination, const Node <T> * pSource)
 {
-   
+    Node<T>* pDes = pDestination;
+    const Node<T>* pSrc = pSource;
+
+    while (pSrc != nullptr && pDes != nullptr) {
+        pDes->data = pSrc->data;
+        pDes = pDes->pNext;
+        pSrc = pSrc->pNext;
+    }
+
+    if (pSrc != nullptr)
+    {
+        Node<T>* pDesPrevious = pDes;
+        while (pSrc != nullptr)
+        {
+            insert(pDes, pSrc->data, true);
+            if (pDestination == nullptr)
+            {
+                pDestination = pDes;
+            }
+            pSrc = pSrc->pNext; 
+        }
+    }
+
+    if (pSrc == nullptr && pDes != nullptr)
+    {
+        bool setToNull = false;
+
+        if (pDes->pPrev != nullptr)
+        {
+            pDes->pPrev->pNext = nullptr;
+        }
+        else
+        {
+            setToNull = true;
+        }
+        clear(pDes);
+        if (setToNull)
+        {
+            pDestination = nullptr;
+        }
+    }
 }
 
 /***********************************************
@@ -123,8 +162,31 @@ inline void swap(Node <T>* &pLHS, Node <T>* &pRHS)
 template <class T>
 inline Node <T> * remove(const Node <T> * pRemove) 
 {
-   return new Node <T>;
+    if (pRemove == NULL) {
+        return nullptr; 
+    }
+
+    Node<T>* pPrev = pRemove->pPrev;
+    Node<T>* pNext = pRemove->pNext;
+    Node<T>* pReturn = nullptr;
+
+    if (pNext) {
+        pNext->pPrev = pPrev;
+    }
+
+    if (pPrev) {
+        pPrev->pNext = pNext;
+        pReturn = pPrev;
+    }
+    else {
+        pReturn = pNext;
+    }
+
+    delete pRemove;
+
+    return pReturn;
 }
+
 
 /**********************************************
  * INSERT 
@@ -142,7 +204,26 @@ inline Node <T> * insert(Node <T> * pCurrent,
                   const T & t,
                   bool after = false)
 {
-   return new Node <T>;
+    Node<T>* pNew = new Node <T>(t);
+
+    if (pCurrent != NULL && after == false) {
+        pNew->pNext = pCurrent;
+        pNew->pPrev = pCurrent->pPrev;
+        pCurrent->pPrev = pNew;
+        if (pNew->pPrev != NULL) {
+            pNew->pPrev->pNext = pNew;
+        }
+    }
+   
+    if (pCurrent != nullptr && after == true) {
+        pNew->pNext = pCurrent->pNext;
+        pNew->pPrev = pCurrent;
+        pCurrent->pNext = pNew;
+        if (pNew->pNext) {
+            pNew->pNext->pPrev = pNew;
+        }
+    }
+    return pNew;
 }
 
 /******************************************************
@@ -156,13 +237,13 @@ inline Node <T> * insert(Node <T> * pCurrent,
 template <class T>
 inline size_t size(const Node <T> * pHead)
 {
-   /*
-   for (*p = pHead; p; p = p->pNext)
+   size_t count = 0;
+   for (const Node<T> *p = pHead; p; p = p->pNext)
    {
-
+       count++;
    }
-   */
-   return 99;
+   
+   return count;
 }
 
 /***********************************************
@@ -189,7 +270,13 @@ inline std::ostream & operator << (std::ostream & out, const Node <T> * pHead)
 template <class T>
 inline void clear(Node <T> * & pHead)
 {
-
+ 
+    while (pHead != NULL)
+    {
+        Node<T>* pDelete = pHead;
+        pHead = pHead->pNext;
+        delete pDelete;
+    }
 }
 
 
