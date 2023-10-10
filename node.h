@@ -73,18 +73,17 @@ public:
 template <class T>
 inline Node <T> * copy(const Node <T> * pSource) 
 {
-    Node<T>* pDestination = nullptr;
-    const Node<T>* pSrc = pSource;
-    Node<T>* pDes = nullptr;
+   if (nullptr == pSource)
+      return nullptr;
 
-    while (pSrc != nullptr) {
-        pDes = insert(pDes, pSrc->data, false);
-        if (pDestination == nullptr) {
-            pDestination = pDes;
-        }
-        pSrc = pSrc->pNext;
-    }
-    return pDestination;
+   Node<T>* pDestination = new Node <T>(pSource->data);
+   const Node <T>* pSrc = pSource;
+   Node<T>* pDes = pDestination;
+
+   for (pSrc = pSrc->pNext; pSrc; pSrc = pSrc->pNext)
+      pDes = insert(pDes, pSrc->data, true);
+
+   return pDestination;
 }
 
 /***********************************************
@@ -98,47 +97,43 @@ inline Node <T> * copy(const Node <T> * pSource)
 template <class T>
 inline void assign(Node <T> * & pDestination, const Node <T> * pSource)
 {
-    Node<T>* pDes = pDestination;
-    const Node<T>* pSrc = pSource;
+   const Node <T>* pSrc;
+   Node<T>* pDes = pDestination;
+   Node<T>* pDesPrevious = nullptr;
 
-    while (pSrc != nullptr && pDes != nullptr) {
-        pDes->data = pSrc->data;
-        pDes = pDes->pNext;
-        pSrc = pSrc->pNext;
-    }
+   for (pSrc = pSource; pSrc != nullptr && pDes != nullptr; pSrc = pSrc->pNext)
+   {
+      pDes->data = pSrc->data;
+      pDesPrevious = pDes;
+      pDes = pDes->pNext;
+   }
 
-    if (pSrc != nullptr)
-    {
-        Node<T>* pDesPrevious = pDes;
-        while (pSrc != nullptr)
-        {
-            insert(pDes, pSrc->data, true);
-            if (pDestination == nullptr)
-            {
-                pDestination = pDes;
-            }
-            pSrc = pSrc->pNext; 
-        }
-    }
+   if (pSrc != nullptr)
+   {
+      pDes = pDesPrevious;
+      
+      for (; pSrc != nullptr; pSrc = pSrc->pNext)
+      {
+         pDes = insert(pDes, pSrc->data, true);
 
-    if (pSrc == nullptr && pDes != nullptr)
-    {
-        bool setToNull = false;
+         if (nullptr == pDestination)
+            pDestination = pDes;
+      }
+   }
+   else if (pDes != nullptr)
+   {
+      bool setToNull = false;
 
-        if (pDes->pPrev != nullptr)
-        {
-            pDes->pPrev->pNext = nullptr;
-        }
-        else
-        {
-            setToNull = true;
-        }
-        clear(pDes);
-        if (setToNull)
-        {
-            pDestination = nullptr;
-        }
-    }
+      if (pDes->pPrev)
+         pDes->pPrev->pNext = nullptr;
+      else
+         setToNull = true;
+
+      clear(pDes);
+
+      if (setToNull)
+         pDestination = nullptr;
+   }
 }
 
 /***********************************************
